@@ -2,6 +2,14 @@
 using Twilio.Types;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
+using RestSharp;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Net.Mime;
+using System.Text;
+using System.Web;
+using Newtonsoft.Json;
 
 namespace MiConsolaNetCore5
 {
@@ -11,7 +19,35 @@ namespace MiConsolaNetCore5
         {
             Console.WriteLine("Hello World!");
 
+            //PruebaTwilio();
 
+
+            PruebaCrearCasoSalesForce();
+
+
+            Console.ReadLine();
+        }
+
+        private static void PruebaCrearCasoSalesForce()
+        {
+            var client = new RestClient("https://grantitan.my.salesforce.com/services/data/v52.0/sobjects/Case");
+            client.Timeout = -1;
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer 00D5Y000001cIob!ASAAQPpb1dq0LxdiRsiSdgmRlMksmAeEzKx6lTBlYabpFtdldXBd6UIkzd72nLbPOrt4GaPtAjWdqEYZasEKnkkN_JCf0f0G");
+            //request.AddHeader("Cookie", "BrowserId=K4EM4-A4Eeu6JcX6BudT5Q; CookieConsentPolicy=0:0");
+            var body = @"{" + "\n" +
+            @"    ""Comments"": ""prueba desde codigo de consola 2""," + "\n" +
+            @"    ""Subject"" : ""Reestablecer contraseña system""," + "\n" +
+            @"    ""SuppliedEmail"": ""sinthiak.rodriguezv@utadeo.edu.co""" + "\n" +
+            @"}";
+            request.AddParameter("application/json", body, ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+            Console.WriteLine(response.Content);
+        }
+
+        private static void PruebaTwilio()
+        {
             TwilioClient.Init("AC8ad490527d2f6adab6f539a8121fab5e", "1271dab43d98be856b9a062bf043a6a3");
 
             var messageOptions = new CreateMessageOptions(
@@ -21,9 +57,6 @@ namespace MiConsolaNetCore5
 
             var message = MessageResource.Create(messageOptions);
             Console.WriteLine(message.Body);
-
-
-            Console.ReadLine();
         }
     }
 }

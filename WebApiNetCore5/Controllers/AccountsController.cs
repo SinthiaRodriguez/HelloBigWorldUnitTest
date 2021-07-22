@@ -41,7 +41,7 @@ namespace WebApiNetCore5.Controllers
             }
             else
             {
-                return BadRequest("Algo esta mal -.-!");
+                return BadRequest(result.Errors);
             }
 
         }
