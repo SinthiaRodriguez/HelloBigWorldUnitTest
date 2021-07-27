@@ -10,6 +10,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Web;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace MiConsolaNetCore5
 {
@@ -20,10 +21,8 @@ namespace MiConsolaNetCore5
             Console.WriteLine("Hello World!");
 
             //PruebaTwilio();
-
-
-            PruebaCrearCasoSalesForce();
-
+            //PruebaCrearCasoSalesForce();
+            PruebaCodigoAleatorio();
 
             Console.ReadLine();
         }
@@ -57,6 +56,18 @@ namespace MiConsolaNetCore5
 
             var message = MessageResource.Create(messageOptions);
             Console.WriteLine(message.Body);
+        }
+
+        private static void PruebaCodigoAleatorio() 
+        {
+            int longitud = 7;
+            Guid miGuid = Guid.NewGuid();
+            string token = Convert.ToBase64String(miGuid.ToByteArray());
+            token = token.Replace("=", "").Replace("+", "");
+            Console.WriteLine(token.Substring(0, longitud));
+
+
+
         }
     }
 }

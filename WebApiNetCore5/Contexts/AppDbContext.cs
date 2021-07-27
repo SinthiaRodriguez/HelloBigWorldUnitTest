@@ -11,5 +11,9 @@ namespace WebApiNetCore5.Contexts
         {
 
         }
+
+        public DbSet<UserCodeToken> UserCodeTokens { get; set; }
+
+        
     }
 }
