@@ -22,7 +22,7 @@ namespace MiConsolaNetCore5
 
             //PruebaTwilio();
             //PruebaCrearCasoSalesForce();
-            PruebaCodigoAleatorio();
+            //PruebaCodigoAleatorio();
 
             Console.ReadLine();
         }

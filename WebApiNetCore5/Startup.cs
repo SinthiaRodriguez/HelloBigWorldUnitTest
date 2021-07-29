@@ -11,7 +11,9 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using WebApiNetCore5.Contexts;
+using WebApiNetCore5.Controllers;
 using WebApiNetCore5.Models;
+using WebApiNetCore5.Servicio;
 
 namespace WebApiNetCore5
 {
@@ -35,6 +37,8 @@ namespace WebApiNetCore5
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddSingleton<ServicioEncriptacion>();
+
             services.Configure<IdentityOptions>(options =>
             {
                 // Default Lockout settings.
@@ -43,6 +47,8 @@ namespace WebApiNetCore5
                 options.Lockout.AllowedForNewUsers = true;
                 options.SignIn.RequireConfirmedEmail = true;
             });
+
+            services.AddDataProtection();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
@@ -55,6 +61,8 @@ namespace WebApiNetCore5
                             ClockSkew = TimeSpan.Zero
                         }
                 );
+
+            services.AddAutoMapper(typeof(Startup).Assembly);
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
