@@ -92,14 +92,41 @@ namespace WebApiNetCore5.Controllers
 
         }
 
+        [HttpPost("ForgetPassword")]
+        public async Task<ActionResult> ForgetPassword([FromBody] UserInfo model)
+        {
+            await generarCodigo(model);
+            return Ok();
+        }
+
+        private async Task generarCodigo(UserInfo model)
+        {
+            var yaTiene = await _appDbContext.UserCodeTokens.AnyAsync(x => x.UserId == model.Email && x.ExpirationDate > DateTime.Now);
+            if (!yaTiene)
+            {
+
+                var tolo = await _userManager.FindByEmailAsync(model.Email);
+
+
+                var tender = await _userManager.GenerateEmailConfirmationTokenAsync(tolo);
+
+                var cidigo = Guid.NewGuid();
+                _appDbContext.UserCodeTokens.Add(new UserCodeToken
+                {
+                    Code = cidigo.ToString().Substring(0, 8).Replace("-", String.Empty),
+                    Token = tender,
+                    UserId = model.Email,
+                    ExpirationDate = DateTime.Now.AddDays(1)
+                });
+
+                await _appDbContext.SaveChangesAsync();
+            }
+        }
+
         [HttpPost("ChangePassword")]
         public async Task<ActionResult> ChangePassword([FromBody] ChangeInfoUser model)
         {
-            var user = new ApplicationUser
-            {
-                UserName = model.Email,
-                Email = model.Email
-            };
+            var user = await _userManager.FindByEmailAsync(model.Email);
             var result = await _userManager.ChangePasswordAsync(user,model.Password,model.NewPass);
             if (result.Succeeded)
             {
@@ -113,28 +140,30 @@ namespace WebApiNetCore5.Controllers
         }
 
         [HttpPost("RestorePassword")]
-        public async Task<ActionResult> RestaurarPass([FromBody] UserInfo model)
+        public async Task<ActionResult> RestaurarPass([FromBody] UserInfo model, [FromHeader] string code)
         {
-            var user = new ApplicationUser
+            var existe = await _appDbContext.UserCodeTokens.AnyAsync(x => x.UserId == model.Email && x.Code == code && x.IsUsed == false);
+            if (existe) 
             {
-                UserName = model.Email,
-                Email = model.Email
-            };
-            //var result = await _userManager.GeneratePasswordResetTokenAsync(user);  //.ChangePasswordAsync(user, model.Password, model.NewPass);
+                var user = await _userManager.FindByEmailAsync(model.Email);
 
-            //var tolo = _userManager.ResetPasswordAsync(user, "token", "new pass");
+                var tolo = await _userManager.RemovePasswordAsync(user);
 
-            var tolomeo = _userManager.GenerateNewAuthenticatorKey() ; //Membership.GeneratePassword(12, 1);
+                var tender = await _userManager.AddPasswordAsync(user, model.Password);
 
-            //if (result.)
-            //{
+                if (tender.Succeeded)
+                {
+                    var token = await _appDbContext.UserCodeTokens.SingleOrDefaultAsync(x => x.UserId == model.Email && x.Code == code);
+                    token.IsUsed = true;
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(tender.Errors);
+                }
+            }
 
-            return Ok();
-            //}
-            //else
-            //{
-            //    return BadRequest(result.Errors);
-            //}
+            return BadRequest();
 
         }
 
@@ -147,17 +176,23 @@ namespace WebApiNetCore5.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
 
                 var token = await _appDbContext.UserCodeTokens.SingleOrDefaultAsync(x => x.UserId == model.Email && x.Code == model.Code);
-                var tender = await _userManager.ConfirmEmailAsync(user,token.Token);
-                if (tender.Succeeded)
+
+                if (!token.IsUsed)
                 {
-                    return Ok();
+                    var tender = await _userManager.ConfirmEmailAsync(user, token.Token);
+                    if (tender.Succeeded)
+                    {
+                        return Ok();
+                    }
+
+                    return BadRequest(tender.Errors);
                 }
 
-                return BadRequest(tender.Errors);
+                return BadRequest("Toekn is used.");
 
             }
 
-            return BadRequest();
+            return BadRequest("Token not exist");
 
         }
 

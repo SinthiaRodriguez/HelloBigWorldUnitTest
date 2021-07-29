@@ -20,5 +20,6 @@ namespace WebApiNetCore5.Models
         public string UserId { get; set; }
 
         public DateTime ExpirationDate { get; set; }
+        public bool IsUsed { get; set; }
     }
 }
