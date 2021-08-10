@@ -12,8 +12,10 @@ namespace WebApiNetCore5.Servicio
     {
         public MappingProfile()
         {
-            CreateMap<UserPruebaDto, UserEncriptadoTest>().AfterMap<SetTraceIdentifierAction>();
-            CreateMap<UserEncriptadoTest,UserPruebaDto>().AfterMap<SetReturn>();
+            CreateMap<UserPruebaDto, UserEncriptadoTest>()
+                .AfterMap<SetTraceIdentifierAction>()
+                .ReverseMap()
+                .AfterMap<SetTraceIdentifierAction>();
         }
     }
 }

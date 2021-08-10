@@ -11,7 +11,9 @@ using WebApiNetCore5.Models;
 
 namespace WebApiNetCore5.Servicio
 {
-    public class SetTraceIdentifierAction : IMappingAction<UserPruebaDto, UserEncriptadoTest>
+    public class SetTraceIdentifierAction : 
+        IMappingAction<UserPruebaDto, UserEncriptadoTest>,
+        IMappingAction<UserEncriptadoTest, UserPruebaDto>
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IDataProtectionProvider _protector;
@@ -26,16 +28,6 @@ namespace WebApiNetCore5.Servicio
             var protector = _protector.CreateProtector(source.Key);
             destination.Email = protector.Protect(source.Email);
             //destination.TraceIdentifier = _httpContextAccessor.HttpContext.TraceIdentifier;
-        }
-    }
-
-    public class SetReturn : IMappingAction<UserEncriptadoTest, UserPruebaDto>
-    {
-        private readonly IDataProtectionProvider _protector;
-
-        public SetReturn(IDataProtectionProvider protector)
-        {
-            _protector = protector;
         }
 
         public void Process(UserEncriptadoTest source, UserPruebaDto destination, ResolutionContext context)

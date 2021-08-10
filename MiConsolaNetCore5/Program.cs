@@ -11,6 +11,9 @@ using System.Text;
 using System.Web;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace MiConsolaNetCore5
 {
@@ -23,8 +26,16 @@ namespace MiConsolaNetCore5
             //PruebaTwilio();
             //PruebaCrearCasoSalesForce();
             //PruebaCodigoAleatorio();
+            PruebaEnum();
 
             Console.ReadLine();
+        }
+
+        private static void PruebaEnum()
+        {
+            
+            
+
         }
 
         private static void PruebaCrearCasoSalesForce()
@@ -69,5 +80,56 @@ namespace MiConsolaNetCore5
 
 
         }
+    }
+
+    public static class EnumHelper
+    {
+        private static readonly Dictionary<Type, Dictionary<Object, String>> _typeDictionary
+            = new Dictionary<Type, Dictionary<Object, String>>();
+
+        static EnumHelper()
+        {
+            _typeDictionary = new Dictionary<Type, Dictionary<Object, String>>();
+            AddEnumToDictionary<Pareno>();
+        }
+
+        public static IReadOnlyDictionary<TEnum, String> GetDictionary<TEnum>() where TEnum : Enum
+        {
+            _typeDictionary.TryGetValue(typeof(TEnum), out Dictionary<Object, String> result);
+            return result?.ToDictionary(p => (TEnum)p.Key, p => p.Value);
+        }
+
+        private static void AddEnumToDictionary<TEnum>() where TEnum : Enum
+        {
+            Type type = typeof(TEnum);
+            _typeDictionary.Add(type, GetEnumDictionary(type));
+        }
+
+        private static Dictionary<Object, String> GetEnumDictionary(Type type)
+        {
+            Dictionary<Object, String> result = new Dictionary<Object, String>();
+            Array values = Enum.GetValues(type);
+            String[] names = Enum.GetNames(type);
+            for (Int32 i = 0; i < values.Length; i++)
+                result.Add(values.GetValue(i), names[i]);
+            return result;
+        }
+    }
+
+    public enum Pareno : byte
+    {
+        Parent = 0,
+        Brother = 1,
+        Cousin = 2,
+        Aunt = 3,
+        GrandFather = 4,
+        FatherInLaw = 5,
+        BrotherInLaw = 6,
+        CloseFriend = 7,
+        FellowStudy = 8,
+        CoWorker = 9,
+        ChurchMember = 10,
+        SportsTeamMember = 11,
+        Other = 12
     }
 }
